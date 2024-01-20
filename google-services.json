@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "1040447994721",
+    "project_id": "lalkaar-411813",
+    "storage_bucket": "lalkaar-411813.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040447994721:android:a839718ed874d413e0a320",
+        "android_client_info": {
+          "package_name": "com.lalkaar.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1040447994721-kloqdo22p9mq8tuv5309tatllrt9mvkp.apps.googleusercontent.com",
+          "client_type": 1, 
+          "android_info": {
+            "package_name": "com.lalkaar.app",
+            "certificate_hash": "0e2b7a7081679d9053ea633ab48d5cbd386077db"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdVgy-05k6FvpseBburzko4Ab8jBWfp60"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
