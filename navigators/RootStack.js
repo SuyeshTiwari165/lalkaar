@@ -6,6 +6,10 @@ import Login from "../screens/Login";
 import { Colors } from "../components/Theme/Styles";
 import Dashboard from "../screens/Dashboard";
 import { CredentialsContext } from "../config/CredentialsContext";
+import ProfilePage from "../screens/ProfilePage";
+import AcceptRequest from "../screens/AcceptRequest";
+import MapScreen from "../screens/MapScreen";
+import DataTable from "../screens/DataTable";
 
 const Stack = createStackNavigator();
 const { tertiary, primary } = Colors;
@@ -36,6 +40,10 @@ const RootStack = () => {
                   component={Welcome}
                 />
                 <Stack.Screen name="Dashboard" component={Dashboard} />
+                <Stack.Screen name="ProfilePage" component={ProfilePage} />
+                <Stack.Screen name="AcceptRequest" component={AcceptRequest} />
+                <Stack.Screen name="MapScreen" component={MapScreen} />
+                <Stack.Screen name="DataTable" component={DataTable} />
               </>
             ) : (
               <>

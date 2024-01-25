@@ -7,15 +7,25 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lalkaar.app",
+      "useFrameworks": "static"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyD9wJ7WF55Ke2akLDeDo6wSUR1R3Jm7wiM"
+        }
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "googleServicesFile": "./google-services.json",
       "package": "com.lalkaar.app",
       "versionCode": 1,
       "adaptiveIcon": {
@@ -23,13 +33,47 @@
         "backgroundColor": "#ffffff"
       }
     },
+    "plugins": [
+      "expo-location",
+      {
+        "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+      },
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/crashlytics"
+    ],
+    "extra": {
+      "oneSignalAppId": "963bd3b0-d203-46bb-9350-2ea300b2cec5",
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.lalkaar.app.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.lalkaar.app.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "3def74c8-63f5-4ee1-bfe5-06fe01cd3a51"
+      }
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "3def74c8-63f5-4ee1-bfe5-06fe01cd3a51"
-      }
-    }
+    "owner": "suyesh165"
   }
 }

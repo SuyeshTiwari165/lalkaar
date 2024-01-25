@@ -4,14 +4,12 @@ import {
   StyleSheet,
   Text,
   Platform,
-  // PermissionsAndroid,
+  ActivityIndicator,
 } from "react-native"; // Import Platform from react-native
 import {
   StyledContainer,
   InnerContainer,
-  PageLogo,
   PageTitle,
-  SubTitle,
   StyledFormArea,
   LeftIcon,
   StyledInputlable,
@@ -20,19 +18,11 @@ import {
   StyledButton,
   ButtonText,
   Colors,
-  MsgBox,
-  Line,
-  ExtraView,
-  ExtraText,
-  TextLink,
-  TextLinkContent,
   SOSButton,
 } from "../components/Theme/Styles";
-import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { useMutation } from "@apollo/client";
 import * as Location from "expo-location";
 import { Modal, Portal, Button, Provider, TextInput } from "react-native-paper";
-// import SOSButton from "../components/SOSButton/SOSButton";
 import { Picker } from "@react-native-picker/picker";
 import { CREATE_SOS } from "../graphql/mutations/sos";
 import { StatusBar } from "expo-status-bar";
@@ -40,6 +30,7 @@ import { Formik } from "formik";
 import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import { CredentialsContext } from "../config/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DataTable from "./DataTable";
 
 const { brand, darkLight, primary } = Colors;
 
@@ -49,8 +40,10 @@ const Dashboard = ({ navigation }) => {
   const [peopleCount, setPeopleCount] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [location, setLocation] = useState(null);
+  const [liveLocation, setliveLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-
+  const [showProfileOptions, setShowProfileOptions] = useState(false); // Added state to control the display of profile options
+  const [displayAccepteduserList, setDisplayAccepteduserList] = useState(false);
   const { storedCredentials, setStoredCredentials } =
     useContext(CredentialsContext);
 
@@ -75,6 +68,16 @@ const Dashboard = ({ navigation }) => {
         }
 
         let location = await Location.getCurrentPositionAsync({});
+        Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 1000, // Update every 1 second
+            distanceInterval: 1, // Update every 1 meter
+          },
+          (newLocation) => {
+            setliveLocation(newLocation.coords);
+          }
+        );
         setLocation(location);
       } catch (error) {
         console.error("Error getting location:", error);
@@ -82,6 +85,49 @@ const Dashboard = ({ navigation }) => {
       }
     })();
   }, []);
+  console.log("liveLocationliveLocation", liveLocation);
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Location permission not granted");
+        return;
+      }
+
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 1000, // Update every 1 second
+          distanceInterval: 1, // Update every 1 meter
+        },
+        (newLocation) => {
+          setLocation(newLocation.coords);
+        }
+      );
+    })();
+  }, []);
+  const broadCastSOSDetails = (message) => {
+    fetch("https://app.nativenotify.com/api/notification", {
+      method: "POST", // Set the method to "POST"
+      headers: {
+        "Content-Type": "application/json", // Use "Content-Type" instead of "content-type"
+      },
+      body: JSON.stringify({
+        // Convert the body to a JSON string
+        appId: 18973,
+        appToken: "6yuH6e1bf7kfO9CfbD3TH1",
+        title: "Push title here as a string",
+        body: "Push message here as a string",
+        dateSent: "1-25-2024 9:23AM",
+        pushData: { yourProperty: "yourPropertyValue" },
+      }),
+    })
+      .then((response) => response.json()) // Use response.json() to parse JSON
+      .then((data) => {})
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   const showModal = async () => {
     setVisible(true);
@@ -136,21 +182,90 @@ const Dashboard = ({ navigation }) => {
     setInputValue(text);
   };
 
-  const handleCustomAction = () => {
-    console.log("Severity:", severity);
-    console.log("People Count:", peopleCount);
-    console.log("Input Value:", inputValue);
+  const handleSubmitSOS = async (values, setSubmitting) => {
     // Implement your logic with the selected values
+    try {
+      const { data, errors } = await createSosRequest({
+        variables: {
+          Description: values.AdditionalInformation,
+          useId: 1,
+          Severity: severity,
+          peopleCount: parseInt(values.peopleCount),
+          geolocation: {
+            address: "",
+            geohash: "",
+            coordinates: {
+              lat: location?.coords?.latitude,
+              lng: location?.coords?.longitude,
+            },
+          },
+        },
+      });
+
+      if (errors) {
+        console.error("GraphQL Errors:", errors);
+        handleMessage(
+          "An error occurred during login. Please try again.",
+          "FAILED"
+        );
+      } else {
+        console.log("GraphQL Data:", data);
+        setDisplayAccepteduserList(true);
+        broadCastSOSDetails(data);
+        // navigation.navigate("Welcome", { data });
+      }
+
+      setSubmitting(false);
+    } catch (error) {
+      console.error("Network Error:", error);
+      setSubmitting(false);
+      handleMessage(
+        "An error occurred. Check your network and try again.",
+        "FAILED"
+      );
+    }
+
     hideModal();
+    setSubmitting(false);
+  };
+
+  const handleProfilePress = () => {
+    setShowProfileOptions(!showProfileOptions);
+  };
+
+  const renderProfileOptions = () => {
+    if (showProfileOptions) {
+      return (
+        <StyledContainer>
+          <View>
+            <StyledButton onPress={() => navigation.navigate("ProfilePage")}>
+              <ButtonText>My Profile</ButtonText>
+            </StyledButton>
+            <StyledButton onPress={ClearLogin}>
+              <ButtonText>Logout</ButtonText>
+            </StyledButton>
+          </View>
+        </StyledContainer>
+      );
+    }
+    return null;
   };
 
   return (
     <StyledContainer>
       <StatusBar style="light" />
+      <View style={styles.header}>
+        <View>
+          <PageTitle welcome={true}>Lalkaar</PageTitle>
+        </View>
+        <View>
+          <RightIcon onPress={handleProfilePress}>
+            <Ionicons name="person-circle-outline" size={30} color={brand} />
+          </RightIcon>
+          {renderProfileOptions()}
+        </View>
+      </View>
       <InnerContainer>
-        {/* <PageLogo resizeMode="cover" source={require("../assets/icon.png")} />
-        <PageTitle>Lalkaar</PageTitle>
-        <SubTitle>Account Login</SubTitle> */}
         <View>
           <View style={styles.centeredView}>
             <SOSButton onPress={handleSOSPress}>
@@ -168,14 +283,15 @@ const Dashboard = ({ navigation }) => {
                   Provide details about the SOS:
                 </Text>
                 <Formik
-                  initialValues={{ identifier: "", password: "" }}
+                  initialValues={{
+                    peopleCount: "",
+                    AdditionalInformation: "",
+                    location: "",
+                  }}
                   onSubmit={(values, { setSubmitting }) => {
-                    if (values.identifier == "" || values.password == "") {
-                      handleMessage("Please fill all the fields");
-                      setSubmitting(false);
-                    } else {
-                      handleLogin(values, setSubmitting);
-                    }
+                    console.log("values", values);
+                    handleSubmitSOS(values, setSubmitting);
+                    setSubmitting(false);
                   }}
                 >
                   {({
@@ -197,48 +313,55 @@ const Dashboard = ({ navigation }) => {
                           <Picker.Item label={item} value={item} key={index} />
                         ))}
                       </Picker>
-                      <Text>Location Example</Text>
+                      <Text>Your Co-ordinates</Text>
                       {errorMsg ? <Text>{errorMsg}</Text> : null}
-                      {location ? (
-                        <Text>Location: {JSON.stringify(location)}</Text>
+                      {location !== null && location?.coords !== null ? (
+                        <Text>
+                          Location: {JSON.stringify(location?.coords?.latitude)}
+                          ,{JSON.stringify(location?.coords?.longitude)}
+                        </Text>
                       ) : null}
                       <MytextInput
                         label="Number of people present"
                         icon="person"
-                        placeholder=""
+                        placeholder="No. of people"
                         onChangeText={handleChange("peopleCount")}
                         onBlur={handleBlur("peopleCount")}
                         value={values.peopleCount}
-                        keyboardType="email-address"
+                        keyboardType="number-pad"
                       />
 
                       <MytextInput
                         label="Additional Information"
                         icon="mail"
-                        placeholder=""
-                        onChangeText={handleChange("inputValue")}
-                        onBlur={handleBlur("inputValue")}
-                        value={values.inputValue}
+                        placeholder="Need help"
+                        onChangeText={handleChange("AdditionalInformation")}
+                        onBlur={handleBlur("AdditionalInformation")}
+                        value={values.AdditionalInformation}
                         keyboardType="email-address"
                       />
-
-                      <TextInput
-                        label="Additional Information"
-                        value={inputValue}
-                        onChangeText={handleInputChange}
-                        style={styles.input}
-                      />
-
-                      {/* Add your Image/Video upload component here */}
-
-                      <Button onPress={handleCustomAction}>Submit SOS</Button>
+                      {!isSubmitting && (
+                        <StyledButton onPress={handleSubmit}>
+                          <ButtonText>Submit SOS</ButtonText>
+                        </StyledButton>
+                      )}
+                      {isSubmitting && (
+                        <StyledButton disabled={true}>
+                          <ActivityIndicator size="Large" color={primary} />
+                        </StyledButton>
+                      )}
                       <Button onPress={hideModal}>Cancel</Button>
                     </StyledFormArea>
                   )}
                 </Formik>
               </Modal>
-              <Button onPress={ClearLogin}>Logout</Button>
+              {/* <Line /> */}
             </Portal>
+            <Button onPress={() => navigation.navigate("AcceptRequest")}>
+              Accept Request
+            </Button>
+            {/* {displayAccepteduserList && <DataTable />} */}
+            <DataTable props={liveLocation} />
           </Provider>
         </View>
       </InnerContainer>
@@ -287,6 +410,15 @@ const styles = StyleSheet.create({
     height: 40,
     width: 200,
     marginBottom: 10,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    color: "white",
+    paddingVertical: 0,
+    paddingHorizontal: 10,
+    // backgroundColor: brand,
   },
 });
 

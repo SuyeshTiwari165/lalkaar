@@ -41,7 +41,7 @@ export const PageLogo = styled.Image`
 `;
 
 export const Avatar = styled.Image`
-  with: 100px;
+  width: 100px;
   object-fit: contain;
   height: 100px;
   margin: auto;
@@ -191,4 +191,11 @@ export const SOSButton = styled.TouchableOpacity`
   border-radius: 50px;
   margin-vertical: 5px;
   height: 60px;
+`;
+
+export const HamburgerContainer = styled.View`
+  justify-content: center;
+  align-content: center;
+  color: ${tertiary};
+  font-size: 15px;
 `;

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { StatusBar } from "expo-status-bar";
+import React, { useState, useEffect, useRef } from "react";
 import ApolloProviderWrapper from "./config/ApolloProvider";
 import { CredentialsContext } from "./config/CredentialsContext";
 import RootStack from "./navigators/RootStack";

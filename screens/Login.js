@@ -27,16 +27,9 @@ import { Formik } from "formik";
 import { View, ActivityIndicator } from "react-native";
 import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  gql,
-  useQuery,
-} from "@apollo/client";
 import { CredentialsContext } from "../config/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as GoogleSignIn from "expo-google-sign-in";
+// import * as GoogleSignIn from "expo-google-sign-in";
 
 const { brand, darkLight, primary } = Colors;
 const Login = ({ navigation }) => {
@@ -128,13 +121,13 @@ const Login = ({ navigation }) => {
       });
   };
 
-  const initAsync = async () => {
-    try {
-      await GoogleSignIn.initAsync({
-        clientId: "",
-      });
-    } catch {}
-  };
+  // const initAsync = async () => {
+  //   try {
+  //     await GoogleSignIn.initAsync({
+  //       clientId: "",
+  //     });
+  //   } catch {}
+  // };
 
   return (
     <KeyboardAvoidingWrapper>

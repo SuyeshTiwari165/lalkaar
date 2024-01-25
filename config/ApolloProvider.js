@@ -2,7 +2,8 @@ import React from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_GRAPHQL_ENDPOINT || "http://192.168.0.106:1337/graphql",
+  uri:
+    process.env.REACT_APP_GRAPHQL_ENDPOINT || "http://192.168.0.101:1337/graphql",
   cache: new InMemoryCache(),
 });
 
