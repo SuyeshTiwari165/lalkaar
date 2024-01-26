@@ -25,7 +25,7 @@ const MapScreen = ({ navigation }, props) => {
   // }, []);
 
   const location = route.params?.locationData;
-  console.log("iddddddddddddddddddddddddddd", route.params.locationData);
+  console.log("iddddddddddddddddddddddddddd", route.params);
   // console.log("lat", route.params.locationData.coordinates.lat);
   // console.log("lng", route.params.locationData.coordinates.lng);
 

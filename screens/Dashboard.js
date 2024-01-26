@@ -140,6 +140,7 @@ const Dashboard = ({ navigation }) => {
   };
 
   const showModal = async () => {
+    console.log("sadsdfdsfdf")
     setVisible(true);
     if (Platform.OS === "android") {
       try {
@@ -264,7 +265,9 @@ const Dashboard = ({ navigation }) => {
 
   return (
     <StyledContainer>
-      <StatusBar style="light" />
+      <StatusBar 
+        backgroundColor="white"
+      style="dark" />
       <View style={styles.header}>
         <View>
           <PageTitle welcome={true}>Lalkaar</PageTitle>
@@ -279,7 +282,7 @@ const Dashboard = ({ navigation }) => {
       <InnerContainer>
         <View>
           <View style={styles.centeredView}>
-            <SOSButton onPress={handleSOSPress}>
+            <SOSButton onPress={showModal}>
               <ButtonText>SOS</ButtonText>
             </SOSButton>
           </View>
@@ -368,17 +371,14 @@ const Dashboard = ({ navigation }) => {
               </Modal>
               {/* <Line /> */}
             </Portal>
-            <Button onPress={() => navigation.navigate("AcceptRequest")}>
-              Accept Request
-            </Button>
-            {getAcceptedUsersdata && (
-              <DataTable
-                usersData={getAcceptedUsersdata}
-                props={liveLocation}
-              />
-            )}
-            <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
           </Provider>
+          <Button onPress={() => navigation.navigate("AcceptRequest")}>
+            Accept Request
+          </Button>
+          {getAcceptedUsersdata && (
+            <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
+          )}
+          <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
         </View>
       </InnerContainer>
     </StyledContainer>

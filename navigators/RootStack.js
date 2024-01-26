@@ -44,6 +44,7 @@ const RootStack = () => {
                 <Stack.Screen name="AcceptRequest" component={AcceptRequest} />
                 <Stack.Screen name="MapScreen" component={MapScreen} />
                 <Stack.Screen name="DataTable" component={DataTable} />
+                <Stack.Screen name="Login" component={Login} />
               </>
             ) : (
               <>

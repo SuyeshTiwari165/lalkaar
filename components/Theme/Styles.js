@@ -2,7 +2,7 @@ import styled from "styled-components/native";
 import { View, Text, Image, TextInput } from "react-native";
 import Constants from "expo-constants";
 
-const StatusbarHeight = Constants.StatusbarHeight;
+// const StatusbarHeight = Constants.StatusbarHeight;
 //colors
 
 export const Colors = {
@@ -14,7 +14,7 @@ export const Colors = {
   green: "#10B981",
   red: "#EF4444",
 };
-console.log("StatusbarHeight", StatusbarHeight);
+// console.log("StatusbarHeight", StatusbarHeight);
 const { primary, secondary, tertiary, darkLight, brand, green, red } = Colors;
 export const StyledContainer = styled.View`
   flex: 1;
