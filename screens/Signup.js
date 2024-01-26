@@ -34,7 +34,7 @@ import {
   gql,
   useQuery,
 } from "@apollo/client";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { brand, darkLight, primary } = Colors;

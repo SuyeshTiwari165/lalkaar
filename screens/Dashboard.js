@@ -2,6 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   StyleSheet,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
   Text,
   Platform,
   ActivityIndicator,
@@ -20,22 +23,28 @@ import {
   Colors,
   SOSButton,
 } from "../components/Theme/Styles";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Modal, Portal, Button, Provider, TextInput } from "react-native-paper";
-import { Picker } from "@react-native-picker/picker";
+// import { Picker } from "@react-native-picker/picker";
 import { CREATE_SOS } from "../graphql/mutations/sos";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik";
 import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DataTable from "./DataTable";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import { ACCEPT_SOS_REQUEST_DATA } from "../graphql/queries/AcceptedRequestData";
+import { usePushNotificationContext } from "../context/PushNotificationContext";
+import Loader from "../components/Loader";
 
 const { brand, darkLight, primary } = Colors;
 
 const Dashboard = ({ navigation }) => {
+  const { expoPushToken } = usePushNotificationContext();
+  const [message, setMessage] = useState("");
+  const [keyboardStatus, setKeyboardStatus] = useState("");
   const [visible, setVisible] = useState(false);
   const [severity, setSeverity] = useState("");
   const [peopleCount, setPeopleCount] = useState("");
@@ -64,8 +73,6 @@ const Dashboard = ({ navigation }) => {
   if (getAcceptedUsersdata) {
     console.log("RAM", getAcceptedUsersdata);
   }
-
-  useEffect(() => {}, []);
 
   useEffect(() => {
     (async () => {
@@ -97,6 +104,20 @@ const Dashboard = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardStatus("Keyboard Shown");
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardStatus("Keyboard Hidden");
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -116,31 +137,35 @@ const Dashboard = ({ navigation }) => {
       );
     })();
   }, []);
-  const broadCastSOSDetails = (message) => {
-    fetch("https://app.nativenotify.com/api/notification", {
-      method: "POST", // Set the method to "POST"
+  
+  const sendPushNotification = async (data) => {
+    console.log("expoPushTokenexpoPushToken",expoPushToken)
+    const message = {
+      to: "ExponentPushToken[2_aeU0K1ZEKHasrPpk9pQ1]",
+      sound: "default",
+      title: "Need help",
+      body: "Test body",
+      data: { testData: data },
+    };
+
+    await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json", // Use "Content-Type" instead of "content-type"
+        Accept: "application/json",
+        "Accept-encoding": "gzip, deflate",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        // Convert the body to a JSON string
-        appId: 18973,
-        appToken: "6yuH6e1bf7kfO9CfbD3TH1",
-        title: "Push title here as a string",
-        body: "Push message here as a string",
-        dateSent: "1-25-2024 9:23AM",
-        pushData: { yourProperty: "yourPropertyValue" },
-      }),
+      body: JSON.stringify(message),
     })
-      // .then((response) => response.json()) // Use response.json() to parse JSON
-      // .then((data) => {})
+      .then((response) => {
+        console.log("responsesss", response);
+      })
       .catch((error) => {
-        console.error("Error:", error);
+        console.log("error", error);
       });
   };
 
   const showModal = async () => {
-    console.log("sadsdfdsfdf")
     setVisible(true);
     if (Platform.OS === "android") {
       try {
@@ -193,21 +218,27 @@ const Dashboard = ({ navigation }) => {
     setInputValue(text);
   };
 
+  const handleMessage = (message, type = "FAILED") => {
+    setMessage(message);
+    setMessageType(type);
+  };
+
   const handleSubmitSOS = async (values, setSubmitting) => {
     // Implement your logic with the selected values
+    console.log("valuess", values);
     try {
       const { data, errors } = await createSosRequest({
         variables: {
           Description: values.AdditionalInformation,
           useId: 1,
-          Severity: severity,
+          Severity: "Low",
           peopleCount: parseInt(values.peopleCount),
           geolocation: {
             address: "",
             geohash: "",
             coordinates: {
-              lat: location?.coords?.latitude,
-              lng: location?.coords?.longitude,
+              lat: location?.latitude,
+              lng: location?.longitude,
             },
           },
         },
@@ -223,7 +254,7 @@ const Dashboard = ({ navigation }) => {
         console.log("GraphQL Data:", data.createSosRequest.data.id);
         setDisplayAccepteduserList(true);
         getAcceptedUsers({ variables: { id: data.createSosRequest.data.id } });
-        broadCastSOSDetails(data);
+        sendPushNotification(data);
         // navigation.navigate("Welcome", { data });
       }
 
@@ -265,120 +296,147 @@ const Dashboard = ({ navigation }) => {
 
   return (
     <StyledContainer>
-      <StatusBar 
-        backgroundColor="white"
-      style="dark" />
+      <StatusBar backgroundColor="white" style="dark" />
+      {location?.latitude == undefined || location?.longitude == undefined ? (
+        <Loader />
+      ) : (
+        <></>
+      )}
       <View style={styles.header}>
         <View>
           <PageTitle welcome={true}>Lalkaar</PageTitle>
-        </View>
-        <View>
-          <RightIcon onPress={handleProfilePress}>
+
+          <RightIcon styles={styles.profileIcon} onPress={handleProfilePress}>
             <Ionicons name="person-circle-outline" size={30} color={brand} />
           </RightIcon>
           {renderProfileOptions()}
         </View>
       </View>
+      <Text>keyboardStatus:{keyboardStatus}</Text>
       <InnerContainer>
         <View>
           <View style={styles.centeredView}>
             <SOSButton onPress={showModal}>
               <ButtonText>SOS</ButtonText>
             </SOSButton>
-          </View>
-          <Provider>
-            <Portal>
-              <Modal
-                visible={visible}
-                onDismiss={hideModal}
-                contentContainerStyle={containerStyle}
-              >
-                <Text style={styles.modalText}>
-                  Provide details about the SOS:
-                </Text>
-                <Formik
-                  initialValues={{
-                    peopleCount: "",
-                    AdditionalInformation: "",
-                    location: "",
-                  }}
-                  onSubmit={(values, { setSubmitting }) => {
-                    console.log("values", values);
-                    handleSubmitSOS(values, setSubmitting);
-                    setSubmitting(false);
-                  }}
-                >
-                  {({
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    values,
-                    isSubmitting,
-                  }) => (
-                    <StyledFormArea>
-                      <Picker
-                        selectedValue={severity}
-                        style={styles.dropdownContainer}
-                        onValueChange={(itemValue) =>
-                          handleSeverityChange(itemValue)
-                        }
-                      >
-                        {severityItems.map((item, index) => (
-                          <Picker.Item label={item} value={item} key={index} />
-                        ))}
-                      </Picker>
-                      <Text>Your Co-ordinates</Text>
-                      {errorMsg ? <Text>{errorMsg}</Text> : null}
-                      {location !== null && location?.coords !== null ? (
-                        <Text>
-                          Location: {JSON.stringify(location?.coords?.latitude)}
-                          ,{JSON.stringify(location?.coords?.longitude)}
-                        </Text>
-                      ) : null}
-                      <MytextInput
-                        label="Number of people present"
-                        icon="person"
-                        placeholder="No. of people"
-                        onChangeText={handleChange("peopleCount")}
-                        onBlur={handleBlur("peopleCount")}
-                        value={values.peopleCount}
-                        keyboardType="number-pad"
-                      />
 
-                      <MytextInput
-                        label="Additional Information"
-                        icon="mail"
-                        placeholder="Need help"
-                        onChangeText={handleChange("AdditionalInformation")}
-                        onBlur={handleBlur("AdditionalInformation")}
-                        value={values.AdditionalInformation}
-                        keyboardType="email-address"
-                      />
-                      {!isSubmitting && (
-                        <StyledButton onPress={handleSubmit}>
-                          <ButtonText>Submit SOS</ButtonText>
-                        </StyledButton>
-                      )}
-                      {isSubmitting && (
-                        <StyledButton disabled={true}>
-                          <ActivityIndicator size="Large" color={primary} />
-                        </StyledButton>
-                      )}
-                      <Button onPress={hideModal}>Cancel</Button>
-                    </StyledFormArea>
-                  )}
-                </Formik>
-              </Modal>
-              {/* <Line /> */}
-            </Portal>
-          </Provider>
-          <Button onPress={() => navigation.navigate("AcceptRequest")}>
-            Accept Request
-          </Button>
-          {getAcceptedUsersdata && (
-            <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
-          )}
-          <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
+            <Provider>
+              <Portal>
+                <Modal
+                  visible={visible}
+                  onDismiss={hideModal}
+                  contentContainerStyle={containerStyle}
+                >
+                  <Text style={styles.modalText}>
+                    Provide details about the SOS:
+                  </Text>
+                  <Formik
+                    initialValues={{
+                      peopleCount: "",
+                      AdditionalInformation: "",
+                      location: "",
+                    }}
+                    onSubmit={(values, { setSubmitting }) => {
+                      console.log("values", values);
+                      handleSubmitSOS(values, setSubmitting);
+                      setSubmitting(false);
+                    }}
+                  >
+                    {({
+                      handleChange,
+                      handleBlur,
+                      handleSubmit,
+                      values,
+                      isSubmitting,
+                    }) => (
+                      <StyledFormArea>
+                        {/* <Picker
+                          selectedValue={severity}
+                          style={styles.dropdownContainer}
+                          onValueChange={(itemValue) =>
+                            handleSeverityChange(itemValue)
+                          }
+                        >
+                          {severityItems.map((item, index) => (
+                            <Picker.Item
+                              label={item}
+                              value={item}
+                              key={index}
+                            />
+                          ))}
+                        </Picker> */}
+                        <Text>Your Co-ordinates</Text>
+                        {errorMsg ? <Text>{errorMsg}</Text> : null}
+                        {location !== null && location?.coords !== null ? (
+                          <Text>
+                            Location: {JSON.stringify(location?.latitude)},
+                            {JSON.stringify(location?.longitude)}
+                          </Text>
+                        ) : null}
+                        <TextInput
+                        // label="Number of people present"
+                        // icon="person"
+                        // placeholder="No. of people"
+                        // onChangeText={handleChange("peopleCount")}
+                        // onBlur={handleBlur("peopleCount")}
+                        // value={values.peopleCount}
+                        // keyboardType="number-pad"
+                        />
+                        <MytextInput
+                          autoFocus
+                          label="Number of people present"
+                          icon="person"
+                          placeholder="No. of people"
+                          onChangeText={handleChange("peopleCount")}
+                          onBlur={handleBlur("peopleCount")}
+                          value={values.peopleCount}
+                          keyboardType="number-pad"
+                        />
+
+                        <MytextInput
+                          label="Additional Information"
+                          icon="mail"
+                          placeholder="Need help"
+                          onChangeText={handleChange("AdditionalInformation")}
+                          onBlur={handleBlur("AdditionalInformation")}
+                          value={values.AdditionalInformation}
+                          keyboardType="email-address"
+                        />
+                        {!isSubmitting && (
+                          <StyledButton onPress={handleSubmit}>
+                            <ButtonText>Submit SOS</ButtonText>
+                          </StyledButton>
+                        )}
+                        {isSubmitting && (
+                          <StyledButton disabled={true}>
+                            <ActivityIndicator size="Large" color={primary} />
+                          </StyledButton>
+                        )}
+                        <Button onPress={hideModal}>Cancel</Button>
+                      </StyledFormArea>
+                    )}
+                  </Formik>
+                </Modal>
+                {/* <Line /> */}
+              </Portal>
+            </Provider>
+            <View style={styles.dataTableContainer}>
+              {/* Render your DataTable component */}
+              {getAcceptedUsersdata && (
+                <DataTable
+                  usersData={getAcceptedUsersdata}
+                  props={liveLocation}
+                />
+              )}
+              {/* <DataTable
+                usersData={getAcceptedUsersdata}
+                props={liveLocation}
+              /> */}
+            </View>
+            <Button onPress={() => navigation.navigate("AcceptRequest")}>
+              Accept Request
+            </Button>
+          </View>
         </View>
       </InnerContainer>
     </StyledContainer>
@@ -405,6 +463,15 @@ const MytextInput = ({
 };
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    padding: 5,
+  },
+  inputStyle: {
+    borderColor: "black",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 2,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -412,8 +479,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   centeredView: {
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "white",
+    // justifyContent: "center",
+    // alignItems: "center",
   },
   modalText: {
     marginBottom: 10,
@@ -428,13 +496,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // alignItems: "center",
     color: "white",
     paddingVertical: 0,
     paddingHorizontal: 10,
     // backgroundColor: brand,
+  },
+  dataTableContainer: {
+    // Style your DataTable container if needed
+    marginTop: 20,
+  },
+  profileIcon: {
+    alignItems: "right",
   },
 });
 

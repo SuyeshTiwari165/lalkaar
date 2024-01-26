@@ -33,34 +33,15 @@
       }
     },
     "plugins": [
-      [
-        "onesignal-expo-plugin",
-        {
-          "mode": "development"
-        }
-      ],
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-firebase/crashlytics"
     ],
     "extra": {
-      "oneSignalAppId": "963bd3b0-d203-46bb-9350-2ea300b2cec5",
       "eas": {
         "build": {
           "experimental": {
-            "ios": {
-              "appExtensions": [
-                {
-                  "targetName": "OneSignalNotificationServiceExtension",
-                  "bundleIdentifier": "com.lalkaar.app.OneSignalNotificationServiceExtension",
-                  "entitlements": {
-                    "com.apple.security.application-groups": [
-                      "group.com.lalkaar.app.onesignal"
-                    ]
-                  }
-                }
-              ]
-            }
+            "ios": {}
           }
         },
         "projectId": "3def74c8-63f5-4ee1-bfe5-06fe01cd3a51"

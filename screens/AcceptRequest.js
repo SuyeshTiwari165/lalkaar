@@ -27,7 +27,7 @@ import DataTable from "./DataTable";
 import { ACCEPT_SOS_REQUEST } from "../graphql/mutations/AcceptSOSRequest";
 import { useMutation } from "@apollo/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 
 const { brand, darkLight, primary } = Colors;
 const AcceptRequest = ({ navigation }) => {

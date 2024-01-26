@@ -20,7 +20,7 @@ import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { USER_DATA } from "../graphql/queries/Users";
 import { Octicons, Ionicons } from "@expo/vector-icons";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery } from "@apollo/client";
 import Loader from "../components/Loader";

@@ -27,7 +27,7 @@ import { Formik } from "formik";
 import { View, ActivityIndicator } from "react-native";
 import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import * as GoogleSignIn from "expo-google-sign-in";
 

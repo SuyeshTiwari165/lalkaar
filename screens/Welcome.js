@@ -19,7 +19,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { Octicons, Ionicons } from "@expo/vector-icons";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { brand, darkLight, primary } = Colors;

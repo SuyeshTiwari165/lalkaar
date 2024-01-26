@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Login from "../screens/Login";
 import { Colors } from "../components/Theme/Styles";
 import Dashboard from "../screens/Dashboard";
-import { CredentialsContext } from "../config/CredentialsContext";
+import { CredentialsContext } from "../context/CredentialsContext";
 import ProfilePage from "../screens/ProfilePage";
 import AcceptRequest from "../screens/AcceptRequest";
 import MapScreen from "../screens/MapScreen";
@@ -44,7 +44,6 @@ const RootStack = () => {
                 <Stack.Screen name="AcceptRequest" component={AcceptRequest} />
                 <Stack.Screen name="MapScreen" component={MapScreen} />
                 <Stack.Screen name="DataTable" component={DataTable} />
-                <Stack.Screen name="Login" component={Login} />
               </>
             ) : (
               <>
