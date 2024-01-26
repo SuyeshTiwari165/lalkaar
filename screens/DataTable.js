@@ -16,16 +16,16 @@ import {
   SOSButton,
 } from "../components/Theme/Styles";
 import { useNavigation } from "@react-navigation/native";
-import { ACCEPT_SOS_REQUEST_DATA } from "../graphql/queries/AcceptRequestData";
+import { ACCEPT_SOS_REQUEST_DATA } from "../graphql/queries/AcceptedRequestData";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 
-const DataTable = (props) => {
+const DataTable = (props, usersData) => {
   const navigation = useNavigation();
   const [acceptedUserslist, setAcceptedUserslist] = useState([]);
   // useEffect(() => {
   //   getAcceptedUsers();
   // }, []);
-
+  console.log("usersData", usersData);
   useEffect(() => {
     if (data) {
       setAcceptedUserslist(data.acceptSosRequests.data);
@@ -39,10 +39,6 @@ const DataTable = (props) => {
   if (loading) {
     return <Text>loading</Text>;
   }
-
-  // const [getAcceptedUsers, { loading, error, data }] = useLazyQuery(
-  //   ACCEPT_SOS_REQUEST_DATA
-  // );
 
   return (
     <View style={styles.wrapper}>

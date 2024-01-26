@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const ACCEPT_SOS_REQUEST_DATA = gql`
-  query {
-    acceptSosRequests {
+  query ($id: ID) {
+    acceptSosRequests(filters: { sos_request: { id: { eq: $id } } }) {
       data {
         id
         attributes {

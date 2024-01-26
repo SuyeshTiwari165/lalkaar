@@ -20,7 +20,6 @@ import {
   Colors,
   SOSButton,
 } from "../components/Theme/Styles";
-import { useMutation } from "@apollo/client";
 import * as Location from "expo-location";
 import { Modal, Portal, Button, Provider, TextInput } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
@@ -31,6 +30,8 @@ import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import { CredentialsContext } from "../config/CredentialsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DataTable from "./DataTable";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
+import { ACCEPT_SOS_REQUEST_DATA } from "../graphql/queries/AcceptedRequestData";
 
 const { brand, darkLight, primary } = Colors;
 
@@ -56,6 +57,15 @@ const Dashboard = ({ navigation }) => {
   };
 
   const [createSosRequest] = useMutation(CREATE_SOS);
+
+  const [getAcceptedUsers, { loading, error, getAcceptedUsersdata }] =
+    useLazyQuery(ACCEPT_SOS_REQUEST_DATA);
+
+  if (getAcceptedUsersdata) {
+    console.log("RAM", getAcceptedUsersdata);
+  }
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     (async () => {
@@ -85,7 +95,7 @@ const Dashboard = ({ navigation }) => {
       }
     })();
   }, []);
-  console.log("liveLocationliveLocation", liveLocation);
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -122,8 +132,8 @@ const Dashboard = ({ navigation }) => {
         pushData: { yourProperty: "yourPropertyValue" },
       }),
     })
-      .then((response) => response.json()) // Use response.json() to parse JSON
-      .then((data) => {})
+      // .then((response) => response.json()) // Use response.json() to parse JSON
+      // .then((data) => {})
       .catch((error) => {
         console.error("Error:", error);
       });
@@ -209,8 +219,9 @@ const Dashboard = ({ navigation }) => {
           "FAILED"
         );
       } else {
-        console.log("GraphQL Data:", data);
+        console.log("GraphQL Data:", data.createSosRequest.data.id);
         setDisplayAccepteduserList(true);
+        getAcceptedUsers({ variables: { id: data.createSosRequest.data.id } });
         broadCastSOSDetails(data);
         // navigation.navigate("Welcome", { data });
       }
@@ -360,8 +371,13 @@ const Dashboard = ({ navigation }) => {
             <Button onPress={() => navigation.navigate("AcceptRequest")}>
               Accept Request
             </Button>
-            {/* {displayAccepteduserList && <DataTable />} */}
-            <DataTable props={liveLocation} />
+            {getAcceptedUsersdata && (
+              <DataTable
+                usersData={getAcceptedUsersdata}
+                props={liveLocation}
+              />
+            )}
+            <DataTable usersData={getAcceptedUsersdata} props={liveLocation} />
           </Provider>
         </View>
       </InnerContainer>

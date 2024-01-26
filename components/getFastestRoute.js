@@ -8,6 +8,7 @@ const getFastestRoute = async (origin, destination, apiKey) => {
 
     const routes = response.data.routes;
     if (routes.length > 0) {
+      console.log("routes", routes);
       const fastestRoute = routes[0];
       return fastestRoute;
     } else {

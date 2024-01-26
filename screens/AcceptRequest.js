@@ -24,11 +24,14 @@ import { StatusBar } from "expo-status-bar";
 import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import DataTable from "./DataTable";
+import { ACCEPT_SOS_REQUEST } from "../graphql/mutations/AcceptSOSRequest";
+import { useMutation } from "@apollo/client";
 
 const { brand, darkLight, primary } = Colors;
 const AcceptRequest = ({ navigation }) => {
   const [showProfileOptions, setShowProfileOptions] = useState(false); // Added state to control the display of profile options
   const [location, setLocation] = useState(null);
+  const [acceptSOS] = useMutation(ACCEPT_SOS_REQUEST);
 
   useEffect(() => {
     (async () => {
@@ -51,6 +54,52 @@ const AcceptRequest = ({ navigation }) => {
 
   const handleProfilePress = () => {
     setShowProfileOptions(!showProfileOptions);
+  };
+
+  const handleAcceptButton = async () => {
+    console.log("Button pressed", {
+      live_location: {
+        address: "",
+        geohash: "",
+        coordinates: {
+          lat: location?.coords?.latitude,
+          lng: location?.coords?.longitude,
+        },
+      },
+      accepted: true,
+      sos_request: 1,
+      users_permissions_user: 1,
+    });
+    let data = {
+      accepted: true,
+      live_location: {
+        address: "",
+        coordinates: { lat: 19.2906181, lng: 72.8664852 },
+        geohash: "",
+      },
+      sos_request: 1,
+      users_permissions_user: 1,
+    };
+    try {
+      const { datas, errors } = await acceptSOS({
+        variables: {
+          live_location: {
+            address: "",
+            geohash: "",
+            coordinates: {
+              lat: location?.coords?.latitude,
+              lng: location?.coords?.longitude,
+            },
+          },
+          accepted: true,
+          sos_request: 1,
+          users_permissions_user: 1,
+        },
+      });
+      console.log("errorserrors", errors);
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   const ClearLogin = () => {
@@ -78,6 +127,7 @@ const AcceptRequest = ({ navigation }) => {
     }
     return null;
   };
+
   return (
     <StyledContainer>
       <StatusBar style="light" />
@@ -95,7 +145,7 @@ const AcceptRequest = ({ navigation }) => {
         <View>
           <View style={styles.centeredView}>
             <Text>Accept SOS Request</Text>
-            <StyledButton>
+            <StyledButton onPress={handleAcceptButton}>
               <ButtonText>Comming</ButtonText>
             </StyledButton>
             {location !== null && location?.coords !== null ? (
@@ -104,10 +154,6 @@ const AcceptRequest = ({ navigation }) => {
                 {JSON.stringify(location?.coords?.longitude)}
               </Text>
             ) : null}
-            {/* <SOSButton onPress={handleSOSPress}>
-              <ButtonText>SOS</ButtonText>
-            </SOSButton> */}
-            <DataTable />
           </View>
         </View>
       </InnerContainer>
