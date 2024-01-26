@@ -1,4 +1,4 @@
-package com.lalkaar
+package com.lalkaar.app
 
 import android.app.Application
 import android.content.res.Configuration
