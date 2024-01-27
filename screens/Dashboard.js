@@ -25,8 +25,15 @@ import {
 } from "../components/Theme/Styles";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import { Modal, Portal, Button, Provider, TextInput } from "react-native-paper";
-// import { Picker } from "@react-native-picker/picker";
+import {
+  Modal,
+  Portal,
+  Button,
+  Provider,
+  TextInput,
+  PaperProvider,
+} from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
 import { CREATE_SOS } from "../graphql/mutations/sos";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik";
@@ -87,8 +94,8 @@ const Dashboard = ({ navigation }) => {
         let location = await Location.getCurrentPositionAsync({});
         Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 1000, // Update every 1 second
+            accuracy: Location.Accuracy.Highest,
+            timeInterval: 10000, // Update every 1 second
             distanceInterval: 1, // Update every 1 meter
           },
           (newLocation) => {
@@ -137,9 +144,9 @@ const Dashboard = ({ navigation }) => {
       );
     })();
   }, []);
-  
+
   const sendPushNotification = async (data) => {
-    console.log("expoPushTokenexpoPushToken",expoPushToken)
+    console.log("expoPushTokenexpoPushToken", expoPushToken);
     const message = {
       to: "ExponentPushToken[2_aeU0K1ZEKHasrPpk9pQ1]",
       sound: "default",
@@ -191,31 +198,21 @@ const Dashboard = ({ navigation }) => {
 
   const containerStyle = {
     backgroundColor: "white",
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
-    width: 300,
+    // width: 300,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
-    marginTop: "50%",
+    marginTop: 500,
+    height: 100,
   };
 
   const severityItems = ["Low", "Medium", "High"];
 
-  const handleSOSPress = () => {
-    showModal();
-  };
-
   const handleSeverityChange = (selectedSeverity) => {
+    console.log("selectedSeverity", selectedSeverity);
     setSeverity(selectedSeverity);
-  };
-
-  const handlePeopleCountChange = (text) => {
-    setPeopleCount(text);
-  };
-
-  const handleInputChange = (text) => {
-    setInputValue(text);
   };
 
   const handleMessage = (message, type = "FAILED") => {
@@ -294,151 +291,166 @@ const Dashboard = ({ navigation }) => {
     return null;
   };
 
+  if (location?.latitude == undefined || location?.longitude == undefined) {
+    console.log("LOCATIONS:--", location?.latitude);
+    console.log("LOCATIONS:--", location?.longitude);
+  }
+
   return (
     <StyledContainer>
       <StatusBar backgroundColor="white" style="dark" />
-      {location?.latitude == undefined || location?.longitude == undefined ? (
-        <Loader />
-      ) : (
-        <></>
-      )}
-      <View style={styles.header}>
-        <View>
-          <PageTitle welcome={true}>Lalkaar</PageTitle>
+      <View>
+        {location?.latitude == undefined || location?.longitude == undefined ? (
+          <Loader visible={true} />
+        ) : (
+          <>
+            <View style={styles.header}>
+              <View>
+                <PageTitle welcome={true}>Lalkaar</PageTitle>
 
-          <RightIcon styles={styles.profileIcon} onPress={handleProfilePress}>
-            <Ionicons name="person-circle-outline" size={30} color={brand} />
-          </RightIcon>
-          {renderProfileOptions()}
-        </View>
-      </View>
-      <Text>keyboardStatus:{keyboardStatus}</Text>
-      <InnerContainer>
-        <View>
-          <View style={styles.centeredView}>
-            <SOSButton onPress={showModal}>
-              <ButtonText>SOS</ButtonText>
-            </SOSButton>
-
-            <Provider>
-              <Portal>
-                <Modal
-                  visible={visible}
-                  onDismiss={hideModal}
-                  contentContainerStyle={containerStyle}
+                <RightIcon
+                  styles={styles.profileIcon}
+                  onPress={handleProfilePress}
                 >
-                  <Text style={styles.modalText}>
-                    Provide details about the SOS:
-                  </Text>
-                  <Formik
-                    initialValues={{
-                      peopleCount: "",
-                      AdditionalInformation: "",
-                      location: "",
-                    }}
-                    onSubmit={(values, { setSubmitting }) => {
-                      console.log("values", values);
-                      handleSubmitSOS(values, setSubmitting);
-                      setSubmitting(false);
-                    }}
-                  >
-                    {({
-                      handleChange,
-                      handleBlur,
-                      handleSubmit,
-                      values,
-                      isSubmitting,
-                    }) => (
-                      <StyledFormArea>
-                        {/* <Picker
-                          selectedValue={severity}
-                          style={styles.dropdownContainer}
-                          onValueChange={(itemValue) =>
-                            handleSeverityChange(itemValue)
-                          }
-                        >
-                          {severityItems.map((item, index) => (
-                            <Picker.Item
-                              label={item}
-                              value={item}
-                              key={index}
-                            />
-                          ))}
-                        </Picker> */}
-                        <Text>Your Co-ordinates</Text>
-                        {errorMsg ? <Text>{errorMsg}</Text> : null}
-                        {location !== null && location?.coords !== null ? (
-                          <Text>
-                            Location: {JSON.stringify(location?.latitude)},
-                            {JSON.stringify(location?.longitude)}
-                          </Text>
-                        ) : null}
-                        <TextInput
-                        // label="Number of people present"
-                        // icon="person"
-                        // placeholder="No. of people"
-                        // onChangeText={handleChange("peopleCount")}
-                        // onBlur={handleBlur("peopleCount")}
-                        // value={values.peopleCount}
-                        // keyboardType="number-pad"
-                        />
-                        <MytextInput
-                          autoFocus
-                          label="Number of people present"
-                          icon="person"
-                          placeholder="No. of people"
-                          onChangeText={handleChange("peopleCount")}
-                          onBlur={handleBlur("peopleCount")}
-                          value={values.peopleCount}
-                          keyboardType="number-pad"
-                        />
+                  <Ionicons
+                    name="person-circle-outline"
+                    size={30}
+                    color={brand}
+                  />
+                </RightIcon>
+                {renderProfileOptions()}
+              </View>
+            </View>
+            <InnerContainer>
+              <View>
+                <View style={styles.centeredView}>
+                  <SOSButton onPress={showModal}>
+                    <ButtonText>SOS</ButtonText>
+                  </SOSButton>
 
-                        <MytextInput
-                          label="Additional Information"
-                          icon="mail"
-                          placeholder="Need help"
-                          onChangeText={handleChange("AdditionalInformation")}
-                          onBlur={handleBlur("AdditionalInformation")}
-                          value={values.AdditionalInformation}
-                          keyboardType="email-address"
-                        />
-                        {!isSubmitting && (
-                          <StyledButton onPress={handleSubmit}>
-                            <ButtonText>Submit SOS</ButtonText>
-                          </StyledButton>
-                        )}
-                        {isSubmitting && (
-                          <StyledButton disabled={true}>
-                            <ActivityIndicator size="Large" color={primary} />
-                          </StyledButton>
-                        )}
-                        <Button onPress={hideModal}>Cancel</Button>
-                      </StyledFormArea>
+                  <Provider>
+                    <Portal>
+                      <Modal
+                        visible={visible}
+                        onDismiss={hideModal}
+                        contentContainerStyle={containerStyle}
+                      >
+                        <Text style={styles.modalText}>
+                          Provide details about the SOS:
+                        </Text>
+                        
+                        <Formik
+                          initialValues={{
+                            peopleCount: "",
+                            AdditionalInformation: "",
+                            location: "",
+                            severity: "",
+                          }}
+                          onSubmit={(values, { setSubmitting }) => {
+                            console.log("values", values);
+                            handleSubmitSOS(values, setSubmitting);
+                            setSubmitting(false);
+                          }}
+                        >
+                          {({
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                            values,
+                            isSubmitting,
+                          }) => (
+                            <StyledFormArea>
+                              <Text>Your Co-ordinates</Text>
+                              {errorMsg ? <Text>{errorMsg}</Text> : null}
+                              {location !== null &&
+                              location?.coords !== null ? (
+                                <Text>
+                                  Location: {JSON.stringify(location?.latitude)}
+                                  ,{JSON.stringify(location?.longitude)}
+                                </Text>
+                              ) : null}
+                              <Picker
+                                selectedValue={severity}
+                                style={styles.dropdownContainer}
+                                onValueChange={(itemValue) =>
+                                  handleSeverityChange(itemValue)
+                                }
+                              >
+                                {severityItems.map((item, index) => (
+                                  <Picker.Item
+                                    label={item}
+                                    value={item}
+                                    key={index}
+                                  />
+                                ))}
+                              </Picker>
+                              <MytextInput
+                                autoFocus
+                                label="Number of people present"
+                                icon="person"
+                                placeholder="No. of people"
+                                onChangeText={handleChange("peopleCount")}
+                                onBlur={handleBlur("peopleCount")}
+                                value={values.peopleCount}
+                                keyboardType="number-pad"
+                              />
+
+                              <MytextInput
+                                label="Additional Information"
+                                icon="mail"
+                                placeholder="Need help"
+                                onChangeText={handleChange(
+                                  "AdditionalInformation"
+                                )}
+                                onBlur={handleBlur("AdditionalInformation")}
+                                value={values.AdditionalInformation}
+                                keyboardType="email-address"
+                              />
+                              {!isSubmitting && (
+                                <StyledButton onPress={handleSubmit}>
+                                  <ButtonText>Submit SOS</ButtonText>
+                                </StyledButton>
+                              )}
+                              {isSubmitting && (
+                                <StyledButton disabled={true}>
+                                  <ActivityIndicator
+                                    size="Large"
+                                    color={primary}
+                                  />
+                                </StyledButton>
+                              )}
+                              <Button onPress={hideModal}>Cancel</Button>
+                            </StyledFormArea>
+                          )}
+                        </Formik>
+                      </Modal>
+
+                      {/* <Line /> */}
+                    </Portal>
+                  </Provider>
+
+                  <View style={styles.dataTableContainer}>
+                    {/* Render your DataTable component */}
+                    {getAcceptedUsersdata && (
+                      <DataTable
+                        usersData={getAcceptedUsersdata}
+                        props={liveLocation}
+                      />
                     )}
-                  </Formik>
-                </Modal>
-                {/* <Line /> */}
-              </Portal>
-            </Provider>
-            <View style={styles.dataTableContainer}>
-              {/* Render your DataTable component */}
-              {getAcceptedUsersdata && (
-                <DataTable
-                  usersData={getAcceptedUsersdata}
-                  props={liveLocation}
-                />
-              )}
-              {/* <DataTable
+                    {/* <DataTable
                 usersData={getAcceptedUsersdata}
                 props={liveLocation}
               /> */}
-            </View>
-            <Button onPress={() => navigation.navigate("AcceptRequest")}>
-              Accept Request
-            </Button>
-          </View>
-        </View>
-      </InnerContainer>
+                  </View>
+                  <Button onPress={() => navigation.navigate("AcceptRequest")}>
+                    Accept Request
+                  </Button>
+                </View>
+              </View>
+            </InnerContainer>
+          </>
+        )}
+      </View>
     </StyledContainer>
   );
 };
@@ -480,6 +492,7 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     backgroundColor: "white",
+    height: 100,
     // justifyContent: "center",
     // alignItems: "center",
   },

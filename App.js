@@ -67,6 +67,7 @@ export default function App() {
       const result = await AsyncStorage.getItem("lalkaarCredentials");
       if (result !== null) {
         setStoredCredentials(JSON.parse(result));
+        setAppIsReady(true);
       } else {
         setStoredCredentials(null);
       }
@@ -109,7 +110,7 @@ export default function App() {
         console.warn(e);
       } finally {
         await SplashScreen.hideAsync(); // Hide splash screen when initialization is done
-        setAppIsReady(true);
+       
       }
     };
 

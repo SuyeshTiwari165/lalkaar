@@ -13,9 +13,9 @@ const KeyboardAvoidingWrapper = ({ children }) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: primary }}>
       <ScrollView>
-        {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           {children}
-        {/* </TouchableWithoutFeedback> */}
+        </TouchableWithoutFeedback>
       </ScrollView>
     </KeyboardAvoidingView>
   );
