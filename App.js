@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { View, Text, Platform } from "react-native";
+import { View, Text, Platform, SafeAreaView } from "react-native";
 import ApolloProviderWrapper from "./config/ApolloProvider";
 import { CredentialsContext } from "./context/CredentialsContext";
 import RootStack from "./navigators/RootStack";
@@ -110,7 +110,6 @@ export default function App() {
         console.warn(e);
       } finally {
         await SplashScreen.hideAsync(); // Hide splash screen when initialization is done
-       
       }
     };
 
@@ -127,14 +126,19 @@ export default function App() {
   }
 
   return (
-    <ApolloProviderWrapper>
-      <PushNotificationProvider value={{ expoPushToken, setExpoPushToken }}>
-        <CredentialsContext.Provider
-          value={{ storedCredentials, setStoredCredentials }}
-        >
-          <RootStack />
-        </CredentialsContext.Provider>
-      </PushNotificationProvider>
-    </ApolloProviderWrapper>
+    <SafeAreaView>
+      <View>
+        <Text>Hello</Text>
+      </View>
+    </SafeAreaView>
+    // <ApolloProviderWrapper>
+    //   <PushNotificationProvider value={{ expoPushToken, setExpoPushToken }}>
+    //     <CredentialsContext.Provider
+    //       value={{ storedCredentials, setStoredCredentials }}
+    //     >
+    //       <RootStack />
+    //     </CredentialsContext.Provider>
+    //   </PushNotificationProvider>
+    // </ApolloProviderWrapper>
   );
 }
