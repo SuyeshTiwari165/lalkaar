@@ -34,11 +34,7 @@
     ],
     "extra": {
       "eas": {
-        "build": {
-          "experimental": {
-            "ios": {}
-          }
-        },
+        "build": {},
         "projectId": "3def74c8-63f5-4ee1-bfe5-06fe01cd3a51"
       }
     },
