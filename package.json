@@ -19,6 +19,7 @@
     "@react-navigation/stack": "^6.3.20",
     "axios": "^1.6.7",
     "expo": "~50.0.4",
+    "expo-dev-client": "^3.3.7",
     "expo-device": "^5.9.3",
     "expo-location": "^16.5.2",
     "expo-notifications": "^0.27.6",
@@ -27,9 +28,11 @@
     "formik": "^2.4.5",
     "react": "18.2.0",
     "react-native": "^0.73.2",
+    "react-native-gesture-handler": "~2.14.0",
     "react-native-maps": "1.8.0",
     "react-native-paper": "^5.12.3",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "react-native-reanimated": "~3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

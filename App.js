@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { View, Text, Platform, SafeAreaView } from "react-native";
 import ApolloProviderWrapper from "./config/ApolloProvider";
@@ -126,19 +127,14 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView>
-      <View>
-        <Text>Hello</Text>
-      </View>
-    </SafeAreaView>
-    // <ApolloProviderWrapper>
-    //   <PushNotificationProvider value={{ expoPushToken, setExpoPushToken }}>
-    //     <CredentialsContext.Provider
-    //       value={{ storedCredentials, setStoredCredentials }}
-    //     >
-    //       <RootStack />
-    //     </CredentialsContext.Provider>
-    //   </PushNotificationProvider>
-    // </ApolloProviderWrapper>
+    <ApolloProviderWrapper>
+      <PushNotificationProvider value={{ expoPushToken, setExpoPushToken }}>
+        <CredentialsContext.Provider
+          value={{ storedCredentials, setStoredCredentials }}
+        >
+          <RootStack />
+        </CredentialsContext.Provider>
+      </PushNotificationProvider>
+    </ApolloProviderWrapper>
   );
 }
